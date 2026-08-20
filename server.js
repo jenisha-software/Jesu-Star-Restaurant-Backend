@@ -12,7 +12,28 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.send("Jesu Star Restaurant Backend is Running!");
 });
+// ===============================
+// Admin Login
+// ===============================
 
+app.post("/api/admin/login", (req, res) => {
+  const { email, password } = req.body;
+
+  if (
+    email === "admin@jesustar.com" &&
+    password === "admin123"
+  ) {
+    return res.json({
+      success: true,
+      message: "Admin login successful",
+    });
+  }
+
+  res.status(401).json({
+    success: false,
+    message: "Invalid email or password",
+  });
+  });
 // ===============================
 // Reservation Schema
 // ===============================
@@ -245,6 +266,37 @@ app.post("/api/orders", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to place order",
+    });
+  }
+});
+app.put("/api/orders/:id", async (req, res) => {
+  try {
+    const { status } = req.body;
+
+    const order = await Order.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    );
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Order status updated successfully",
+      order,
+    });
+  } catch (error) {
+    console.error("Status Update Error:", error.message);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to update order status",
     });
   }
 });
